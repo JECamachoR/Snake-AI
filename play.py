@@ -84,9 +84,9 @@ def main():
 
         field.update_grid(snake, fruits)
         for x in range(ROWS):
-            n_x = (x-snake_head[0] -center) %ROWS
+            n_x = (x - snake_head[0] - center) %ROWS
             for y in range(ROWS):
-                n_y = (y-snake_head[1] - center) % ROWS
+                n_y = (y - snake_head[1] - center) % ROWS
                 snake_view.grid[n_x, n_y] = field.grid[x,y]
 
         draw_window(win, field, snake_view)
