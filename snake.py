@@ -3,8 +3,6 @@ import time
 import random
 import numpy as np
 
-pygame.font.init()
-#STAT_FONT = pygame.font.SysFont("courierstd", 50)
 WIN_WIDTH, WIN_HEIGHT = 800, 720
 GRID_WIDTH = 400
 ROWS = 15

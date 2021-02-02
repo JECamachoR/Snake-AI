@@ -1,17 +1,37 @@
 from snake import *
+pygame.font.init()
+STAT_FONT = pygame.font.SysFont("arial", 50)
+SCORE = 0
+with open("HIGH_SCORE.txt", "r") as f:
+    HIGH_SCORE = f.read()
+    if len(HIGH_SCORE) > 0:
+        HIGH_SCORE = int(HIGH_SCORE)
+    else:
+        HIGH_SCORE = 0
+#print(HIGH_SCORE)
+
+def record_hs():
+    if SCORE > HIGH_SCORE:
+        with open("HIGH_SCORE.txt", "w") as f:
+            f.write(str(SCORE))
 
 def draw_window(win, field, snake_view=None):
+    win.fill((0,0,0))
+    pygame.draw.line(win, (150, 150, 150), (GRID_WIDTH, 0), (GRID_WIDTH, GRID_WIDTH))
     field.draw(win)
     snake_view.draw(win, offset_x=GRID_WIDTH)
+    text = STAT_FONT.render(f"HIGH SCORE: {HIGH_SCORE}", 1,(255,255,255))
+    win.blit(text, (10,10+GRID_WIDTH))
+    text = STAT_FONT.render(f"Score: {SCORE}", 1,(255,255,255))
+    win.blit(text, (10,10+GRID_WIDTH+text.get_height()))
     pygame.display.update()
 
 def main():
     # Initializes the screen
     center = ROWS // 2 + 1 if ROWS % 2 == 1 else ROWS // 2
     n_fruits = 5
+    global HIGH_SCORE, SCORE
     win = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
-    win.fill((0,0,0))
-    pygame.draw.line(win, (150, 150, 150), (GRID_WIDTH, 0), (GRID_WIDTH, GRID_WIDTH))
     field = Field()
     snake = Snake(5,5)
     snake_view = Field()
@@ -19,7 +39,7 @@ def main():
     clock = pygame.time.Clock()
     run = True
     while run:
-        clock.tick(5)
+        clock.tick(8)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False    
@@ -46,6 +66,7 @@ def main():
 
         snake.move()
         if snake.bite():
+            record_hs()
             run = False
         snake_head = snake.head()
         rem = None
@@ -59,6 +80,7 @@ def main():
             fruits.remove(rem)
             fruits.append(Fruit(field.available_grid))
             snake.eat()
+            SCORE += 1
 
         field.update_grid(snake, fruits)
         for x in range(ROWS):
