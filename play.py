@@ -40,11 +40,9 @@ def snake_vision_color(n):
 
 def get_dir_value(array):
     c = len(array)
-    print(c)
     for val in array:
         if np.abs(val) > 1e-3:
             n = val * (c / array.shape[0])
-            print(n)
             return n
         c -= 1
     return 0
@@ -111,8 +109,6 @@ def main():
             if NGRIDS == 2:
                 snake_vision(game, snake_view, i)
             draw_window(win, game, snake_view)
-            if NGRIDS == 2:
-                snake_vision(game, snake_view, i)
         clock.tick(1)
 
     pygame.font.init()
