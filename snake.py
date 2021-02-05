@@ -8,10 +8,10 @@ class Game:
     it also saves information about the score
     """
     COLORS = {
-        -1: (255, 0, 0),
-        -2: (255, 0, 255),
+        -1: (162, 64, 65),
+        -2: (136, 30, 32),
         0: (50,50,50),
-        1: (0,255,0)
+        1: (90,115,48)
     } # The colors used to display the game
 
     def __init__(self, rows=7, cols=7, n_fruits=1, colors=None, high_score_path="HIGH_SCORE.txt"):
@@ -32,7 +32,7 @@ class Game:
             cols                                                # number of columns
         )
         self.field = Field(rows=rows, cols=cols)
-        self.fruits = [Fruit(positions=self.field.available_positions)]
+        self.fruit = Fruit(positions=self.field.available_positions)
 
     def iteration(self):
         # Gets input from controller (be it the player or AI to be implemented)
@@ -40,22 +40,18 @@ class Game:
         # Given the input calculate the movement of the snake
         self.snake.move()
         # If the snakes bites itself save high_score and end game
-        if self.snake.bite():
+        head = self.snake.head()
+        if self.snake.bite() or head[0] >= self.ROWS or head[1] >= self.COLS or (head == -1).any():
             self.save_high_score()
             return False
         # Check if fruit has been eaten
-        snake_head = self.snake.head()
-        rem = None
-        for fruit in self.fruits:
-            if abs(snake_head[0] - fruit.position[0]) < 1 and abs(snake_head[1] - fruit.position[1]) < 1:
-                rem = fruit
-        if rem:
-            self.fruits.remove(rem)
-            self.fruits.append(Fruit(self.field.available_positions))
+        if abs(head[0] - self.fruit.position[0]) < 1 and abs(head[1] - self.fruit.position[1]) < 1:
+            self.fruit = Fruit(self.field.available_positions)
             self.snake.eat()
             self.score += 1
+
         self.HIGH_SCORE = self.score if self.score > self.HIGH_SCORE else self.HIGH_SCORE
-        self.field.update_grid(self.snake, self.fruits)
+        self.field.update_grid(self.snake, self.fruit)
         return True
 
     def get_high_score(self, path="HIGH_SCORE.txt"):
@@ -100,7 +96,7 @@ class Snake:
 
     def move(self):
         # Funcion that moves the snake in a particular direction
-        new_head = np.mod(np.array([self.positions[-1] + self.direction]), np.array([self.ROWS, self.COLS]))
+        new_head = np.array([self.positions[-1] + self.direction])
         self.tail_left = tuple(self.positions[0,:])
         if not self.eaten:
             self.positions[:-1] = self.positions[1:]
@@ -147,7 +143,7 @@ class Field():
             for j in range(self.COLS)
         )
 
-    def update_grid(self, snake, fruits):
+    def update_grid(self, snake, fruit):
         self.available_positions.add(snake.tail_left)
         self.grid[snake.tail_left[0], snake.tail_left[1]] = 0
         for pos in snake.positions[:-1]:
@@ -159,10 +155,9 @@ class Field():
         self.grid[pos[0], pos[1]] = -2
         if (pos[0], pos[1]) in self.available_positions: 
             self.available_positions.remove((pos[0], pos[1]))
-        for fruit in fruits:
-            self.grid[fruit.position[0], fruit.position[1]] = 1
-            if (fruit.position[0], fruit.position[1]) in self.available_positions:
-                self.available_positions.remove((fruit.position[0], fruit.position[1]))
+        self.grid[fruit.position[0], fruit.position[1]] = 1
+        if (fruit.position[0], fruit.position[1]) in self.available_positions:
+            self.available_positions.remove((fruit.position[0], fruit.position[1]))
     
     def empty_grid(self):
         self.grid = np.zeros((self.ROWS, self.COLS), dtype=np.int8)

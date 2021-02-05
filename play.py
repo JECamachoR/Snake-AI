@@ -24,7 +24,7 @@ class HumanGame(Game):
                 self.snake.direction[0] = 0
         if keys[pygame.K_SPACE]:
             self.snake.move()
-            self.field.update_grid(self.snake,self.fruits)
+            self.field.update_grid(self.snake,self.fruit)
 
 
 COLORS = {
@@ -38,30 +38,26 @@ def snake_vision_color(n):
     else:
         return (int(min(abs(n)*250, 250)),0,0)
 
-def get_dir_value(array):
-    c = len(array)
-    for val in array:
-        if np.abs(val) > 1e-3:
-            n = val * (c / array.shape[0])
-            return n
-        c -= 1
-    return 0
-def snake_vision(game, field, i):
-    view_dirs = [
-        np.array([0,1])
+def snake_vision_2(game, field):
+    pos = game.snake.positions - game.snake.head()
+    vert = pos[pos[:,1] == 0][:,0]
+    horz = pos[pos[:,0] == 0][:,1]
+    diag_1 = pos[np.where(pos[:,0] == pos[:,1]), 0]
+    diag_2 = pos[np.where(pos[:,0] ==-pos[:,1]), 0]
+    ds = [
+        -diag_1[diag_1 < 0],    # NORTH WEST
+        -vert[vert < 0],        # NORTH
+        -diag_2[diag_2 < 0],    # NORTH EAST
+        -horz[horz < 0],        # WEST
+        np.array([0.5]),        # CENTER
+        horz[horz > 0],         # EAST
+        diag_2[diag_2 > 0],     # SOUTH WEST
+        vert[vert > 0],         # SOUTH
+        diag_1[diag_1 > 0]      # SOUTH EAST
     ]
-    shift = game.CENTER - game.snake.head()
-    grid = np.roll(game.field.grid, shift=(shift[0], shift[1]), axis=(0,1))
-
-    field.grid[2,1] = get_dir_value(grid[game.CENTER[0]+1:, game.CENTER[1]])    # ABAJO 1
-    field.grid[0,1] = get_dir_value(np.flip(grid[:game.CENTER[0], game.CENTER[1]]))      # ARRIBA 1
-    field.grid[1,0] = get_dir_value(np.flip(grid[game.CENTER[0], :game.CENTER[1]]))      # IZQUIERDA
-    field.grid[1,2] = get_dir_value(grid[game.CENTER[0], game.CENTER[1]+1:])    # DERECHA
-    field.grid[0,0] = get_dir_value(grid[i[0]])                                 # SUPERIOR IZQUIERDA 3
-    field.grid[2,2] = get_dir_value(grid[i[1]])                                 # INFERIOR DERECHA 1
-    field.grid[0,2] = get_dir_value(grid[i[2]])                                 # SUPERIOR DERECHA 3
-    field.grid[2,0] = get_dir_value(grid[i[3]])                                 # INFERIOR IZQUIERDA 1
-    field.grid[1,1] = -2
+    field.grid = np.array([d.min() if len(d)>0 else 0 for d in ds]).reshape(field.grid.shape)
+    i_xy = np.nonzero(field.grid)
+    field.grid[i_xy] = -1 / (field.grid[i_xy])
 
 def main():
     # Initializes game values
@@ -90,15 +86,8 @@ def main():
         else:
             snake_view = None
         run = True
-        i = np.diag_indices(min(game.ROWS, game.COLS))
-        i_1 = (np.flip(i[0][:game.CENTER[0]]), np.flip(i[1][:game.CENTER[1]]))      # SUPERIOR IZQUIERDA
-        i_2 = (i[0][game.CENTER[0]+1:], i[0][game.CENTER[1]+1:])                    # INFERIOR DERECHA
-        i = (i[0], np.flip(i[1]))
-        i_3 = (np.flip(i[0][:game.CENTER[0]]), np.flip(i[1][:game.CENTER[1]]))      # INFERIOR IZQUIERDA
-        i_4 = (i[0][game.CENTER[0]+1:], i[1][game.CENTER[1]+1:])                    # SUPERIOR DERECHA
-        i = [i_1, i_2, i_3, i_4]
         while run:
-            clock.tick(2)
+            clock.tick(5)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False    
@@ -107,7 +96,7 @@ def main():
 
             run = game.iteration()
             if NGRIDS == 2:
-                snake_vision(game, snake_view, i)
+                snake_vision_2(game, snake_view)
             draw_window(win, game, snake_view)
         clock.tick(1)
 
