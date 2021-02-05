@@ -2,7 +2,7 @@ from snake import *
 import pygame_menu
 import sys
 import numpy as np
-
+import math
 class HumanGame(Game):
     def get_input(self):
         keys = pygame.key.get_pressed()
@@ -58,6 +58,9 @@ def snake_vision_2(game, field):
     field.grid = np.array([d.min() if len(d)>0 else 0 for d in ds]).reshape(field.grid.shape)
     i_xy = np.nonzero(field.grid)
     field.grid[i_xy] = -1 / (field.grid[i_xy])
+    # Up til here there are 8 inputs
+    dist = game.fruit.position - game.snake.head()
+    dist = max(game.ROWS, game.COLS) * dist/np.linalg.norm(dist)
 
 def main():
     # Initializes game values
@@ -65,9 +68,30 @@ def main():
         def draw_window(win, game, snake_view):
             win.fill((0,0,0))
             game.draw(win, GRID_SPACE=SQUARE_WIDTH)
+            dist = game.fruit.position-game.snake.head()
+            direc = (GRID_WIDTH/2)*dist/np.linalg.norm(dist)
             if NGRIDS > 1:
                 pygame.draw.rect(win, (200,200,200), (GRID_WIDTH+1, 1, SQUARE_WIDTH - 2, WIN_HEIGHT - 2))
-                snake_view.draw(win, GRID_SPACE=GRID_WIDTH//3, colors=snake_vision_color, offset_x=GRID_WIDTH+SQUARE_WIDTH)
+                snake_view.draw(
+                    win, 
+                    GRID_SPACE=GRID_WIDTH//3, 
+                    colors=snake_vision_color, 
+                    offset_x=GRID_WIDTH+SQUARE_WIDTH
+                )
+                pygame.draw.line(
+                    win, 
+                    (0,255,0), 
+                    (SQUARE_WIDTH + 3*GRID_WIDTH/2, SQUARE_WIDTH*game.COLS/2), 
+                    (direc[1] + SQUARE_WIDTH + 3*GRID_WIDTH/2, SQUARE_WIDTH*game.COLS/2 + direc[0]),
+                    width=3
+                )
+                head = game.snake.head() +1
+                y_dist, x_dist = head[0] / game.ROWS, head[1] / game.COLS
+
+                text = STAT_FONT.render(f"{x_dist:2f}, {y_dist:2f}", 1, (255,255,255))
+                win.blit(text, (10+GRID_WIDTH+SQUARE_WIDTH, 10))
+
+
             text = STAT_FONT.render(f"HIGH SCORE: {game.HIGH_SCORE}", 1,(255,255,255))
             win.blit(text, (10,10))
             text = STAT_FONT.render(f"Score: {game.score}", 1,(255,255,255))
@@ -87,7 +111,7 @@ def main():
             snake_view = None
         run = True
         while run:
-            clock.tick(5)
+            clock.tick(4)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False    
