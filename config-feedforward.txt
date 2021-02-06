@@ -12,7 +12,7 @@ activation_options      = relu hat exp gauss sigmoid sin
 
 # node aggregation options
 aggregation_default     = sum
-aggregation_mutate_rate = 0.0
+aggregation_mutate_rate = 0.1
 aggregation_options     = sum
 
 # node bias options
@@ -34,14 +34,14 @@ conn_delete_prob        = 0.5
 
 # connection enable options
 enabled_default         = True
-enabled_mutate_rate     = 0.01
+enabled_mutate_rate     = 0.1
 
 feed_forward            = True
 initial_connection      = full
 
 # node add/remove rates
-node_add_prob           = 0.3
-node_delete_prob        = 0.3
+node_add_prob           = 0.5
+node_delete_prob        = 0.5
 
 # network parameters
 num_hidden              = 0
@@ -76,4 +76,4 @@ species_elitism      = 2
 
 [DefaultReproduction]
 elitism            = 2
-survival_threshold = 0.3
+survival_threshold = 0.05

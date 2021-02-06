@@ -1,6 +1,9 @@
 from snake import *
 import os
 import neat
+import pickle
+import pygame
+import sys
 
 pygame.font.init()
 STAT_FONT = pygame.font.SysFont("arial", 50)
@@ -193,10 +196,8 @@ def train(genomes, config):
                 pygame.quit()
                 run = False
                 quit()
-        if GEN % 5 == 0:
-            clock.tick(12)
-        if HIGH_SCORE > 5:
-            clock.tick(8)
+        if HIGH_SCORE > 25:
+            clock.tick(15)
         games_ended = []
         for game in games:
             if not game.iteration():
@@ -230,7 +231,13 @@ def run(config_path):
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
 
-    winner = p.run(train, 1000)
+    winner = p.run(train, 50)
+    try:
+        path = sys.argv[1:] + ".pkl"
+    except:
+        path = "pedro.pkl"
+    with open("pedro.pkl", "wb") as f:
+        pickle.dump(winner, f)
 
 
 if __name__ == "__main__":

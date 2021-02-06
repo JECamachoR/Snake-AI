@@ -1,5 +1,4 @@
 from snake import *
-import pygame_menu
 import sys
 import numpy as np
 import math
