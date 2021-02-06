@@ -33,6 +33,7 @@ class Game:
         )
         self.field = Field(rows=rows, cols=cols)
         self.fruit = Fruit(positions=self.field.available_positions)
+        self.field.update_grid(self.snake, self.fruit)
 
     def iteration(self):
         # Gets input from controller (be it the player or AI to be implemented)
@@ -144,8 +145,11 @@ class Field():
         )
 
     def update_grid(self, snake, fruit):
-        self.available_positions.add(snake.tail_left)
-        self.grid[snake.tail_left[0], snake.tail_left[1]] = 0
+        try:
+            self.available_positions.add(snake.tail_left)
+            self.grid[snake.tail_left[0], snake.tail_left[1]] = 0
+        except:
+            return False
         for pos in snake.positions[:-1]:
             self.grid[pos[0], pos[1]] = -1
             if (pos[0], pos[1]) in self.available_positions:
@@ -158,6 +162,7 @@ class Field():
         self.grid[fruit.position[0], fruit.position[1]] = 1
         if (fruit.position[0], fruit.position[1]) in self.available_positions:
             self.available_positions.remove((fruit.position[0], fruit.position[1]))
+        return True
     
     def empty_grid(self):
         self.grid = np.zeros((self.ROWS, self.COLS), dtype=np.int8)
