@@ -83,7 +83,7 @@ class Snake:
         # Position is a list of tuples where each tuple
         # is a coordinate of the position of a certain
         # block in the field
-        self.positions = np.array([np.array([x, y])])
+        self.positions = np.array([np.array([x, y-2]),np.array([x, y-1]),np.array([x, y])])
         self.direction = np.array([0, 1])
         # dir is an array of [x,y] values for the direction 
         # of the snake's movement

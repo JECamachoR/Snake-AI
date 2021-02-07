@@ -8,13 +8,7 @@ import sys
 pygame.font.init()
 STAT_FONT = pygame.font.SysFont("arial", 50)
 
-try:
-    with open("AI_HIGH_SCORE.txt", "r") as f:
-        GLOBAL_HIGH_SCORE = int(f.read())
-except FileNotFoundError:
-    GLOBAL_HIGH_SCORE = 0
-except ValueError:
-    GLOBAL_HIGH_SCORE = 0
+GLOBAL_HIGH_SCORE = 0
 ROWS, COLS = 15,15
 HIGH_SCORE = 0
 CENTER = ROWS // 2 + 1 if ROWS % 2 == 1 else ROWS // 2
@@ -34,7 +28,6 @@ class TrainingGame(Game):
         self.COLS = cols
         self.score = 0
         self.moves_since_point = 0
-        self.HIGH_SCORE = self.get_high_score("AI_HIGH_SCORE.txt")
         self.CENTER = np.array([
             rows // 2,
             cols // 2
@@ -60,7 +53,6 @@ class TrainingGame(Game):
         # If the snakes bites itself save high_score and end game
         head = self.snake.head()
         if self.snake.bite() or head[0] >= self.ROWS or head[1] >= self.COLS or (head < 0).any():
-            self.save_high_score()
             self.genome.fitness -= 500
             return False
         # Check if fruit has been eaten
@@ -85,32 +77,6 @@ class TrainingGame(Game):
             return True
 
     def get_input(self):
-        """def snake_vision_2(game, field):
-        pos = game.snake.positions - game.snake.head()
-        vert = pos[pos[:,1] == 0][:,0]
-        horz = pos[pos[:,0] == 0][:,1]
-        diag_1 = pos[np.where(pos[:,0] == pos[:,1]), 0]
-        diag_2 = pos[np.where(pos[:,0] ==-pos[:,1]), 0]
-        ds = [
-            -diag_1[diag_1 < 0],    # NORTH WEST
-            -vert[vert < 0],        # NORTH
-            -diag_2[diag_2 < 0],    # NORTH EAST
-            -horz[horz < 0],        # WEST
-            np.array([0.5]),        # CENTER
-            horz[horz > 0],         # EAST
-            diag_2[diag_2 > 0],     # SOUTH WEST
-            vert[vert > 0],         # SOUTH
-            diag_1[diag_1 > 0]      # SOUTH EAST
-        ]
-        field.grid = np.array([d.min() if len(d)>0 else 0 for d in ds]).reshape(field.grid.shape)
-        i_xy = np.nonzero(field.grid)
-        field.grid[i_xy] = -1 / (field.grid[i_xy])
-        # Up til here there are 8 inputs
-        dist = game.fruit.position - game.snake.head()
-        dist = max(game.ROWS, game.COLS) * dist/np.linalg.norm(dist)
-        head = game.snake.head() +1
-        y_dist, x_dist = head[0] / game.ROWS, head[1] / game.COLS
-        """
         pos = self.snake.positions - self.snake.head()
         vert = pos[pos[:,1] == 0][:,0]
         horz = pos[pos[:,0] == 0][:,1]
@@ -140,21 +106,17 @@ class TrainingGame(Game):
 
         # THE REAL ONE
         if o == 0:
-            if self.snake.direction[1] != -1:
-                self.snake.direction[1] = 1
-                self.snake.direction[0] = 0
+            self.snake.direction[1] = 1
+            self.snake.direction[0] = 0
         elif o == 1:
-            if self.snake.direction[0] != 1:
-                self.snake.direction[0] = -1
-                self.snake.direction[1] = 0
+            self.snake.direction[0] = -1
+            self.snake.direction[1] = 0
         elif o == 2:
-            if self.snake.direction[1] != 1:
-                self.snake.direction[1] = -1
-                self.snake.direction[0] = 0
+            self.snake.direction[1] = -1
+            self.snake.direction[0] = 0
         elif o == 3:
-            if self.snake.direction[0] != -1:
-                self.snake.direction[0] = 1
-                self.snake.direction[1] = 0
+            self.snake.direction[0] = 1
+            self.snake.direction[1] = 0
 
 def display(win, games):
     win.fill((0,0,0))
@@ -196,7 +158,7 @@ def train(genomes, config):
                 pygame.quit()
                 run = False
                 quit()
-        if HIGH_SCORE > 25:
+        if HIGH_SCORE > GLOBAL_HIGH_SCORE or (HIGH_SCORE > 5 and HIGH_SCORE < GLOBAL_HIGH_SCORE):
             clock.tick(15)
         games_ended = []
         for game in games:

@@ -135,7 +135,7 @@ def main():
             print("Usage: play.py NGRIDS COLS ROWS")
     else:
         NGRIDS = 2
-        COLS, ROWS = 9,9
+        COLS, ROWS = 15,15
     WIN_WIDTH = int((COLS / ROWS) * WIN_HEIGHT * NGRIDS)
     SQUARE_WIDTH = min(WIN_HEIGHT // ROWS, WIN_WIDTH // COLS)
     GRID_WIDTH = WIN_WIDTH // NGRIDS
