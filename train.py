@@ -193,12 +193,10 @@ def run(config_path):
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
 
+    path = sys.argv[1] + ".pkl"
+    print("training" + sys.argv[1])
     winner = p.run(train, 50)
-    try:
-        path = sys.argv[1:] + ".pkl"
-    except:
-        path = "pedro.pkl"
-    with open("pedro.pkl", "wb") as f:
+    with open(path, "wb") as f:
         pickle.dump(winner, f)
 
 

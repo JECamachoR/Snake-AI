@@ -58,7 +58,7 @@ class AIGame(Game):
 
         # Up til here there are 8 inputs
         output = self.net.activate(
-            selfception + fruit_smell.tolist() + head_pos + self.snake.direction.tolist()
+            selfception + fruit_smell.tolist() + head_pos #+ self.snake.direction.tolist()
         )
         o = output.index(max(output))
 
